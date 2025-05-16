@@ -27,7 +27,7 @@ const fileExists = async (filePath) => {
  * fileName:保存文件的名称，要求唯一
  */
 
-const saveImage = async (base64Image, savePath, fileName) => {
+const saveMediaFile = async (base64Data, savePath, fileName) => {
   try {
     const outputDirectory = path.resolve(__dirname, `../${savePath}`);
     if (!(await directoryExists(outputDirectory))) {
@@ -38,13 +38,13 @@ const saveImage = async (base64Image, savePath, fileName) => {
       console.log(`File ${fileOutputPath} already exists.`);
       return;
     }
-    console.log(`Saving image to ${fileOutputPath}`);
+    console.log(`Saving media to ${fileOutputPath}`);
     // 将 Base64 编码的字符串解码为 Buffer 对象
-    const imageBuffer = Buffer.from(base64Image, "base64");
+    const imageBuffer = Buffer.from(base64Data, "base64");
     await fs.writeFile(fileOutputPath, imageBuffer, "binary");
   } catch (error) {
-    console.error("Error saving image:", error);
+    console.error("Error saving media:", error);
   }
 };
 
-module.exports = { saveImage };
+module.exports = { saveMediaFile };

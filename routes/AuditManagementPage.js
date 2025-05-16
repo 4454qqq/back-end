@@ -187,7 +187,7 @@ router.get("/travelLogs", async (req, res) => {
     // 将 MongoDB 文档对象转换为普通 JavaScript 对象
     const result = travelLogs.map((item) => {
       const imagesUrl = item.imagesUrl.map(
-        (imageUrl) => `${config.localhost}/${config.logUploadPath}/${imageUrl}`
+        (imageUrl) => `${config.localhost}/${config.imgUploadPath}/${imageUrl}`
       );
       const newItem = {
         _id: item._id,

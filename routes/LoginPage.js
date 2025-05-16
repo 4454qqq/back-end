@@ -15,14 +15,23 @@ function generateToken(payload) {
   return jwt.sign(payload, secretKey, options);
 }
 
-// 解决跨域问题...
-// (此处省略解决跨域的代码)
-//验证
 
 // 处理用户登录请求
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
   try {
+    // 防止用户恶意试探密码
+
+    // 检查是否被限流
+    if (req.rateLimit && req.rateLimit.remaining <= 0) {
+      
+      return res.status(429).json({
+        status: "error",
+        message: "操作频繁",
+        retryAfter: Math.ceil((req.rateLimit.resetTime - Date.now()) / 1000)
+      });
+    }
+
     const user = await User.findOne({ username, password: md5(password) });
     if (user) {
       const payload = {
@@ -55,7 +64,8 @@ router.post("/login", async (req, res) => {
         },
       });
     } else {
-      res.status(401).json({ status: "error", message: "用户名或密码不正确" });
+      res.status(401).json({ status: "error", message: "用户名或密码不正确", remainingAttempts: req.rateLimit ? req.rateLimit.remaining : undefined});
+      
       console.log("Invalid username or password");
     }
   } catch (err) {

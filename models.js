@@ -15,8 +15,8 @@ const UserSchema = new Schema({
   customId: { type: Number },
   userAvatar: {
     type: String,
-    default: "f8f769da-109a-459e-8113-2239ab1f5d96.jpg",
-  }, // 用户头像的 URL
+    default: "user_1.png",
+  }, // 用户默认头像的 URL
   profile: {
     type: String,
     default: "有趣的灵魂万里挑一",
@@ -28,8 +28,8 @@ const UserSchema = new Schema({
   },
   backgroundImage: {
     type: String,
-    default: "e9b95a7e21de57284deef0dd3f818b07.jpeg",
-  }, // 用户头像的 URL
+    default: "background_2.png",
+  }, // 用户默认背景的 URL
   follow: {
     type: Number,
     default: 0,
@@ -45,6 +45,7 @@ const TravelLogSchema = new Schema({
   title: { type: String }, // 标题
   content: { type: String }, // 内容
   imagesUrl: [{ type: String }], // 存储图片的 URL 列表
+  videosUrl: [{ type:String }], // 存储视频的URL列表
   travelMonth: {
     type: String,
     enum: [

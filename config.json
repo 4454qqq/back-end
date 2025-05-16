@@ -2,8 +2,9 @@
     "baseURL": "http://10.0.2.2:8080",
     "localhost": "http://localhost:8080",
     "secretKey":"King",
-    "note":"以下路径前后均不能增加斜杠",
-    "userAvatarPath":"image/userAvatar",
-    "userBackgroundPath":"image/userBackground",
-    "logUploadPath":"image/logUpload"
+    "note":"以下路径为前端上传文件的保存路径，前后均不能增加斜杠",
+    "userAvatarPath":"data/userAvatar",
+    "userBackgroundPath":"data/userBackground",
+    "imgUploadPath":"data/logUpload",
+    "videoUploadPath": "data/videos"
 }

@@ -12,8 +12,6 @@ const { authenticateToken } = require("./auth");
 router.get("/getMyLogs", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    // const { selectedTopic, searchContent } = req.query;
-    // console.log(selectedTopic);
     const selectedFields = {
       _id: 1,
       title: 1,
@@ -21,22 +19,17 @@ router.get("/getMyLogs", authenticateToken, async (req, res) => {
       likes: 1,
       state: 1,
       userId: 1,
+      instruction: 1
     }; // 选择要获取的字段，1表示包含该字段，0表示不包含该字段
     const travelLogs = await TravelLog.find(
       {
         $and: [
-          { userId: userId }, // 查询状态为“已通过”的游记信息
-          //   { state: "待审核" }, // 之后改回
+          { userId: userId }, 
         ],
       },
       selectedFields
     ).populate("userId", "username userAvatar"); //获取游记文档时返回关联作者的昵称和头像
     const filteredTravelLogs = travelLogs
-      //   .filter((item) => {
-      //     const titleMatch = item.title.includes(searchContent);
-      //     const authorMatch = item.userId.username.includes(searchContent);
-      //     return titleMatch || authorMatch;
-      //   })
       .sort((a, b) => b.hits - a.hits) // 按点击量降序排序
       .map((item) => {
         let imageUrl = item.imagesUrl[0]; // 只展示第一张图片
@@ -58,6 +51,7 @@ router.get("/getMyLogs", authenticateToken, async (req, res) => {
           username: item.userId.username,
           userAvatar: userAvatar,
           state: item.state,
+          instruction: item.instruction
         };
         return newItem;
       });

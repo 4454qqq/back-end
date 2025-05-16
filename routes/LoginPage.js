@@ -4,6 +4,7 @@ const config = require("../config.json");
 const md5 = require("md5");
 const router = express.Router();
 const { User, TravelLog, Manager } = require("../models"); //引入模型
+const rateLimit = require("express-rate-limit");
 
 // 密钥，请替换为你的实际密钥
 const secretKey = config.secretKey;
@@ -15,16 +16,32 @@ function generateToken(payload) {
   return jwt.sign(payload, secretKey, options);
 }
 
+const loginLimit = 5;  //密码试错次数
+const limitLoginTime = 1;  //限制登录时间（分钟）
+
+// 登录接口限流 - 防止暴力破解
+const loginLimiter = rateLimit({
+  windowMs: limitLoginTime * 60 * 1000, // 分钟
+  max: loginLimit + 1, // 限制登录尝试次数
+  message: {
+    error: "登录尝试次数过多"
+  },
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => {
+    return `${req.ip}-${req.body.username}`; // 根据IP+用户名组合限流
+  }
+});
 
 // 处理用户登录请求
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   const { username, password } = req.body;
   try {
     // 防止用户恶意试探密码
-
     // 检查是否被限流
+    console.log(req.rateLimit.remaining);
+    
     if (req.rateLimit && req.rateLimit.remaining <= 0) {
-      
+
       return res.status(429).json({
         status: "error",
         message: "操作频繁",
@@ -64,8 +81,8 @@ router.post("/login", async (req, res) => {
         },
       });
     } else {
-      res.status(401).json({ status: "error", message: "用户名或密码不正确", remainingAttempts: req.rateLimit ? req.rateLimit.remaining : undefined});
-      
+      res.status(401).json({ status: "error", message: "用户名或密码不正确", remainingAttempts: req.rateLimit ? req.rateLimit.remaining : undefined });
+
       console.log("Invalid username or password");
     }
   } catch (err) {
@@ -74,11 +91,34 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// 处理用户注册请求
-router.post("/register", async (req, res) => {
-  const { username, password, email, phone } = req.body;
 
+const registerLimit = 1;  //注册次数限制
+const limitRegisterTime = 1;  //限制登录时间（分钟）
+
+// 注册接口限流 - 防止恶意注册，ip匹配
+const registerLimiter = rateLimit({
+  windowMs: limitRegisterTime * 60 * 1000, // 时间窗口
+  max: registerLimit + 1, // 限制注册次数
+  message: {
+    error: "注册次数过多"
+  },
+  skipFailedRequests: true, //跳过注册失败的请求
+});
+
+// 处理用户注册请求
+router.post("/register", registerLimiter, async (req, res) => {
+  const { username, password, email, phone } = req.body;
   try {
+  
+    // 检查是否被限流
+    if (req.rateLimit && req.rateLimit.remaining <= 0) {
+
+      return res.status(429).json({
+        status: "error",
+        message: "操作频繁",
+        retryAfter: Math.ceil((req.rateLimit.resetTime - Date.now()) / (1000))
+      });
+    }
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       res

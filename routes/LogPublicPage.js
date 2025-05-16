@@ -122,6 +122,7 @@ router.post("/drafts", authenticateToken, async (req, res) => {
     title,
     content,
     images,
+    videos,
     travelMonth,
     percost,
     rate,
@@ -131,6 +132,7 @@ router.post("/drafts", authenticateToken, async (req, res) => {
   } = req.body;
   console.log(req.body);
   const imageData = images._parts[0][1];
+  const videoData = videos?._parts[0][1];
   res.setHeader("content-type", "application/json");
   // 保存游记图片
   try {
@@ -141,6 +143,12 @@ router.post("/drafts", authenticateToken, async (req, res) => {
       return `${md5}.${ext}`;
     }); // 摘要运算得到加密文件名
     console.log(imagesUrl);
+    const videosUrl = videoData.map((data) => {
+      const md5 = calaMD5(data[0]);
+      const ext = data[1];
+      return `${md5}.${ext}`;
+    }); // 摘要运算得到加密文件名
+    console.log(videosUrl);
     imagesUrl.forEach((fileName, index) =>
       saveImage(imageData[index][0], config.imgUploadPath, fileName)
     );

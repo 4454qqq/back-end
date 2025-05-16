@@ -2,7 +2,7 @@ const express = require("express");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit"); // 新增
+const rateLimit = require("express-rate-limit"); // 新增限流库
 
 const auditManagementRoutes = require("./routes/AuditManagementPage");
 const homeRoutes = require("./routes/HomePage");
@@ -21,29 +21,20 @@ const PORT = 8080;
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
   max: 1000, // 每个IP限制1000次请求
-  message: { 
-    error: "请求过于频繁，请稍后再试" 
+  message: {
+    error: "请求过于频繁，请稍后再试"
   },
   standardHeaders: true, // 返回标准速率限制头
   legacyHeaders: false, // 禁用旧的X-RateLimit-*头
 });
 
-// 登录接口更严格的限制 - 防止暴力破解
-const loginLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 15分钟
-  max: 5, // 每个IP限制20次登录尝试
-  message: { 
-    error: "登录尝试次数过多, 请15分钟后再试" 
-  },
-  skipSuccessfulRequests: true,
-});
 
 // API接口限制
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
   max: 300, // 每个IP限制300次API请求
-  message: { 
-    error: "API请求过于频繁, 请稍后再试" 
+  message: {
+    error: "API请求过于频繁, 请稍后再试"
   },
 });
 
@@ -67,12 +58,12 @@ app.use(
 // 应用通用速率限制
 app.use(generalLimiter);
 
-// 静态文件目录 - 通常不需要速率限制
+// 静态文件目录
 app.use("/data", express.static("data"));
 app.use("/userAvatar", express.static("userAvatar"));
 
 // 路由配置 - 为不同路由应用不同的限制
-app.use("/login", loginLimiter, loginRoutes); // 登录接口更严格限制
+app.use("/login", apiLimiter, loginRoutes); // 登录接口内部设置严格限制
 app.use("/auditManagement", apiLimiter, auditManagementRoutes);
 app.use("/home", homeRoutes);
 app.use("/logDetail", apiLimiter, logDetailRoutes);

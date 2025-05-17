@@ -3,7 +3,7 @@ const config = require("../config.json");
 const router = express.Router();
 const { User, TravelLog, Manager, Focus } = require("../models"); //引入模型
 const crypto = require("crypto");
-const { saveImage } = require("../utils/fileManager");
+const { saveMediaFile } = require("../utils/fileManager");
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -108,7 +108,7 @@ router.post("/updateBackgroundImage", authenticateToken, async (req, res) => {
     const imagesUrl = md5 + "." + ext;
     // 摘要运算得到加密文件名
     console.log(imagesUrl);
-    await saveImage(imageData[0], config.userBackgroundPath, imagesUrl);
+    await saveMediaFile(imageData[0], config.userBackgroundPath, imagesUrl);
     //更新用户的背景图片
     console.log(userId);
     const result = await User.updateOne(
@@ -152,7 +152,7 @@ router.post("/updateUserAvatar", authenticateToken, async (req, res) => {
     const imagesUrl = md5 + "." + ext;
     // 摘要运算得到加密文件名
     console.log(imagesUrl);
-    saveImage(imageData[0], config.userAvatarPath, imagesUrl);
+    saveMediaFile(imageData[0], config.userAvatarPath, imagesUrl);
     //更新用户的背景图片
     console.log(userId);
     const result = await User.updateOne(

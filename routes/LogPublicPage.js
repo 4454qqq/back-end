@@ -150,7 +150,7 @@ router.post("/drafts", authenticateToken, async (req, res) => {
     }); // 摘要运算得到加密文件名
     console.log(videosUrl);
     imagesUrl.forEach((fileName, index) =>
-      saveImage(imageData[index][0], config.imgUploadPath, fileName)
+      saveMediaFile(imageData[index][0], config.imgUploadPath, fileName)
     );
 
     const travelLog = new TravelLog({

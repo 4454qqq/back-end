@@ -209,6 +209,34 @@ router.get("/travelLogs", async (req, res) => {
   }
 });
 
+// 根据游记id返回游记详细信息
+router.get("/findLog/:id", async (req, res) => {
+  try {
+    const logId = req.params.id;
+    const travelLog = await TravelLog.findById(logId);
+    if (!travelLog) {
+      return res.status(404).json({ error: "Travel log not found" });
+    }
+
+    // 拼接图片和视频路径
+    const newImagesUrl = travelLog.imagesUrl.map(
+      (imageUrl) => `${config.localhost}/${config.imgUploadPath}/${imageUrl}`
+    );
+    travelLog.imagesUrl = newImagesUrl;
+    
+    const newVideosUrl = travelLog.videosUrl.map(
+      (videoUrl) => `${config.localhost}/${config.videoUploadPath}/${videoUrl}`
+    );
+    travelLog.videosUrl = newVideosUrl;
+    
+    res.json(travelLog);
+    // console.log(travelLog);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // 更新游记状态
 router.put("/stateUpdate/:id", async (req, res) => {
   try {

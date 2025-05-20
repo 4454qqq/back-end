@@ -38,6 +38,9 @@ const initializeManagerData = async () => {
     // 保存到数据库
     await superAdmin.save();
     console.log("超级管理员初始化成功！");
+    console.log('用户名：', username);
+    console.log('密码：', password);
+    
   } catch (error) {
     console.error("初始化超级管理员失败：", error);
   }finally{
